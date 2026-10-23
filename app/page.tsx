@@ -4,6 +4,7 @@ const popular=[
  {title:"Foreign travel advice",text:"View current security and conflict notices.",href:"/travel-advice",icon:Globe2},
  {title:"Apply for a visa",text:"Submit a fictional visa application and receive a downloadable reference summary.",href:"/apply-visa",icon:ClipboardCheck},
  {title:"Government publications",text:"Open official roleplay documents and statements.",href:"/publications",icon:FileText},
+ {title:"Ministry personnel",text:"View fictional ministers, titles, and portfolios.",href:"/ministry-personnel",icon:Landmark},
  {title:"Government and leadership",text:"View senior ministers and departmental structures.",href:"/services",icon:Landmark},
  {title:"Defence careers / operations",text:"Explore fictional careers and active operations summaries.",href:"/services",icon:BriefcaseBusiness},
  {title:"Diplomatic recognition",text:"Explore foreign relations on an interactive map.",href:"/diplomatic-recognition",icon:MapPinned},
