@@ -148,10 +148,14 @@ export default function AdminDashboard() {
   }
 
   async function syncGitHubSnapshot() {
-    const response = await fetch("/api/admin/publish", { method: "POST" });
-    const result = await response.json();
-    if (!response.ok) return " GitHub sync did not complete: " + (result.error || "Unknown error.");
-    return result.commit_url ? " GitHub commit: " + result.commit_url : " GitHub snapshot published.";
+    try {
+      const response = await fetch("/api/admin/publish", { method: "POST" });
+      const result = await response.json();
+      if (!response.ok) return " GitHub sync did not complete: " + (result.error || "Unknown error.");
+      return result.commit_url ? " GitHub commit: " + result.commit_url : " GitHub snapshot published.";
+    } catch (error) {
+      return " GitHub sync failed: " + (error instanceof Error ? error.message : "Network error.");
+    }
   }
 
   async function publishNow() {
