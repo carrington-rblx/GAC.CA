@@ -91,7 +91,7 @@ export default function AdminDashboard() {
             if (error) throw error;
           }
         }
-        setMessage("Record saved to the database. Public visibility follows its published setting.");
+        setMessage("Record saved to the database. Public visibility follows its published setting." + await syncGitHubSnapshot());
       }
       setTargetId(""); setAction("create"); setDraft(JSON.stringify(templates[section], null, 2)); await load();
     } catch (error) { setMessage(error instanceof Error ? error.message : "Save failed."); }
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
       }
       const { error } = await supabase.from("content_submissions").update({ status, reviewed_by: user?.id, reviewed_at: new Date().toISOString(), review_note: reviewNote[item.id] || null }).eq("id", item.id);
       if (error) throw error;
-      setMessage(status === "approved" ? "Proposal approved and applied to the database." : "Proposal rejected.");
+      setMessage(status === "approved" ? "Proposal approved and applied to the database." + await syncGitHubSnapshot() : "Proposal rejected.");
       await load();
     } catch (error) { setMessage(error instanceof Error ? error.message : "Review failed."); }
     finally { setBusy(false); }
@@ -139,6 +139,13 @@ export default function AdminDashboard() {
       setMessage(result.message || "Editor invitation sent."); setEditorEmail(""); setEditorName("");
     } catch (error) { setMessage(error instanceof Error ? error.message : "Could not invite editor."); }
     finally { setBusy(false); }
+  }
+
+  async function syncGitHubSnapshot() {
+    const response = await fetch("/api/admin/publish", { method: "POST" });
+    const result = await response.json();
+    if (!response.ok) return " GitHub sync did not complete: " + (result.error || "Unknown error.");
+    return result.commit_url ? " GitHub commit: " + result.commit_url : " GitHub snapshot published.";
   }
 
   async function publishNow() {
