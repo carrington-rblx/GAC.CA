@@ -1,45 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-
 const allowedTypes = ["visa", "passport_first", "passport_renewal", "passport_replacement", "emergency_travel_document"] as const;
-function adminClient() {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) throw new Error("Application service is not configured.");
-  return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } });
-}
-export async function POST(request: Request) {
-  let body: Record<string, unknown>;
-  try { body = await request.json(); } catch { return NextResponse.json({ error: "Please complete the form and try again." }, { status: 400 }); }
-  const type = String(body.application_type || "");
-  const applicant_name = String(body.applicant_name || "").trim();
-  const roblox_username = String(body.roblox_username || "").trim();
-  const discord_username = String(body.discord_username || "").trim();
-  const country_of_residence = String(body.country_of_residence || "").trim();
-  const purpose = String(body.purpose || "").trim();
-  if (!allowedTypes.includes(type as typeof allowedTypes[number]) || !applicant_name || !roblox_username || !country_of_residence || !purpose) return NextResponse.json({ error: "Please complete all required fields." }, { status: 400 });
-  if (applicant_name.length > 100 || roblox_username.length > 40 || discord_username.length > 80 || country_of_residence.length > 100 || purpose.length > 2000) return NextResponse.json({ error: "One or more fields are too long." }, { status: 400 });
-  try {
-    const admin = adminClient();
-    const { data, error } = await admin.from("service_applications").insert({
-      application_type: type, applicant_name, roblox_username, discord_username: discord_username || null,
-      country_of_residence, fictional_birth_date: body.fictional_birth_date || null, purpose,
-      form_data: typeof body.form_data === "object" && body.form_data ? body.form_data : {}, status: "submitted"
-    }).select("reference_code,application_type,applicant_name,roblox_username,country_of_residence,status,created_at").single();
-    if (error || !data) return NextResponse.json({ error: "We could not save the request. Please try again shortly." }, { status: 500 });
-    return NextResponse.json({ application: data }, { status: 201 });
-  } catch { return NextResponse.json({ error: "Application service is temporarily unavailable." }, { status: 503 }); }
-}
-export async function GET(request: Request) {
-  const url = new URL(request.url);
-  const reference = (url.searchParams.get("reference") || "").trim().toUpperCase();
-  const roblox = (url.searchParams.get("roblox") || "").trim();
-  if (!reference || !roblox) return NextResponse.json({ error: "Enter the reference number and Roblox username used on the application." }, { status: 400 });
-  try {
-    const admin = adminClient();
-    const { data, error } = await admin.from("service_applications").select("reference_code,application_type,applicant_name,roblox_username,country_of_residence,status,review_note,created_at,updated_at").eq("reference_code", reference).ilike("roblox_username", roblox).maybeSingle();
-    if (error) return NextResponse.json({ error: "Status lookup is temporarily unavailable." }, { status: 503 });
-    if (!data) return NextResponse.json({ error: "No matching application was found. Check both details and try again." }, { status: 404 });
-    return NextResponse.json({ application: data });
-  } catch { return NextResponse.json({ error: "Status lookup is temporarily unavailable." }, { status: 503 }); }
-}
+function adminClient() { const url=process.env.NEXT_PUBLIC_SUPABASE_URL;const key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||!key)throw new Error("Application service is not configured.");return createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}}); }
+export async function POST(request:Request){let body:Record<string,unknown>;try{body=await request.json();}catch{return NextResponse.json({error:"Please complete the form and try again."},{status:400});}const type=String(body.application_type||"");const applicant_name=String(body.applicant_name||"").trim();const roblox_username=String(body.roblox_username||"").trim();const discord_username=String(body.discord_username||"").trim();const country_of_residence=String(body.country_of_residence||"").trim();const purpose=String(body.purpose||"").trim();if(!allowedTypes.includes(type as typeof allowedTypes[number])||!applicant_name||!roblox_username||!country_of_residence||!purpose)return NextResponse.json({error:"Please complete all required fields."},{status:400});if(applicant_name.length>100||roblox_username.length>40||discord_username.length>80||country_of_residence.length>100||purpose.length>2000)return NextResponse.json({error:"One or more fields are too long."},{status:400});try{const admin=adminClient();const {data,error}=await admin.from("service_applications").insert({application_type:type,applicant_name,roblox_username,discord_username:discord_username||null,country_of_residence,fictional_birth_date:body.fictional_birth_date||null,purpose,form_data:typeof body.form_data==="object"&&body.form_data?body.form_data:{},status:"submitted"}).select("reference_code,application_type,applicant_name,roblox_username,country_of_residence,status,created_at").single();if(error||!data)return NextResponse.json({error:"We could not save the request. Please try again shortly."},{status:500});return NextResponse.json({application:data},{status:201});}catch{return NextResponse.json({error:"Application service is temporarily unavailable."},{status:503});}}
+export async function GET(request:Request){const url=new URL(request.url);const reference=(url.searchParams.get("reference")||"").trim().toUpperCase();const roblox=(url.searchParams.get("roblox")||"").trim();if(!reference||!roblox)return NextResponse.json({error:"Enter the reference number and Roblox username used on the application."},{status:400});try{const db=adminClient();const {data,error}=await db.from("service_applications").select("reference_code,application_type,applicant_name,roblox_username,country_of_residence,status,review_note,created_at,updated_at").eq("reference_code",reference).ilike("roblox_username",roblox).maybeSingle();if(error)return NextResponse.json({error:"Status lookup is temporarily unavailable."},{status:503});if(data)return NextResponse.json({application:data});const {data:career,error:careerError}=await db.from("career_applications").select("reference_code,applicant_name,roblox_username,country_of_residence,status,review_note,created_at,updated_at,career_listings(title)").eq("reference_code",reference).ilike("roblox_username",roblox).maybeSingle();if(careerError)return NextResponse.json({error:"Status lookup is temporarily unavailable."},{status:503});if(career)return NextResponse.json({application:{...career,application_type:"career",job_title:(career.career_listings as {title:string}|null)?.title||"Career application"}});return NextResponse.json({error:"No matching application was found. Check both details and try again."},{status:404});}catch{return NextResponse.json({error:"Status lookup is temporarily unavailable."},{status:503});}}
