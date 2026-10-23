@@ -1,0 +1,1 @@
+create unique index if not exists staff_profiles_roblox_lower_idx on public.staff_profiles(lower(roblox_username)) where roblox_username is not null;
