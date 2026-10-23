@@ -8,7 +8,7 @@ Configure these in the Vercel project settings for Production, Preview, and Deve
 
 - `NEXT_PUBLIC_SUPABASE_URL` = `https://qksgheshblgmijvpzvyw.supabase.co`
 - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` = the publishable key for the separate `GAC-CA-Admin` Supabase project
-- `SUPABASE_SERVICE_ROLE_KEY` = the Supabase service-role secret for that project; server-side only, never prefix it with `NEXT_PUBLIC_`
+- `SUPABASE_SERVICE_ROLE_KEY` = the Supabase Secret key (`sb_secret_…`) or legacy `service_role` key for that project; server-side only, never prefix it with `NEXT_PUBLIC_`
 - `GAC_GITHUB_TOKEN` = a fine-grained GitHub token restricted to `carrington-rblx/GAC.CA` with Contents read/write access; server-side only
 
 After saving environment variables, redeploy the site. Do not put either secret into source control, browser code, screenshots, or chat messages.
