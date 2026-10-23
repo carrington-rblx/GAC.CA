@@ -10,8 +10,8 @@ export const levelMeta: Record<TravelLevel,{title:string;bg:string;color:string;
 export const travelNotices = [
  {country:"Ireland",level:"RED" as TravelLevel,updated:"2026-08-01 09:00",text:"Security notice: avoid all travel pending further review."},
  {country:"Finland",level:"GREEN" as TravelLevel,updated:"2026-07-28 12:30",text:"Routine travel may proceed in this current assessment."},
- {country:"Lebanon",level:"AMBER" as TravelLevel,updated:"2026-07-25 16:00",text:"Avoid non-essential travel while fictional regional conditions remain unstable."},
- {country:"Ukraine",level:"RED" as TravelLevel,updated:"2026-08-02 08:15",text:"Fictional notice: avoid all travel until further notice."},
+ {country:"Lebanon",level:"AMBER" as TravelLevel,updated:"2026-07-25 16:00",text:"Avoid non-essential travel while regional conditions remain unstable."},
+ {country:"Ukraine",level:"RED" as TravelLevel,updated:"2026-08-02 08:15",text:"Notice: avoid all travel until further notice."},
  {country:"Germany",level:"GREEN" as TravelLevel,updated:"2026-07-30 11:45",text:"Routine precautions are recommended for travel."}
 ];
 export const recognitionRecords = [
@@ -21,8 +21,8 @@ export const recognitionRecords = [
  {name:"Germany",capital:"Berlin",status:"RECOGNISED",lat:52.52,lng:13.405,summary:"Diplomatic relationship record.",treaties:["Bilateral Consultation Agreement"]},
  {name:"Ireland",capital:"Dublin",status:"SUSPENDED",lat:53.3498,lng:-6.2603,summary:"Relationship status: suspended.",treaties:["Dialogue Framework (suspended in scenario)"]},
  {name:"Lebanon",capital:"Beirut",status:"LIMITED",lat:33.8938,lng:35.5018,summary:"Limited engagement and public advisory markers.",treaties:["Consular Coordination Note"]},
- {name:"Northern Ireland",capital:"Belfast",status:"SUSPENDED",lat:54.5973,lng:-5.9301,summary:"Fictional scenario record only.",treaties:["Community Liaison Protocol"]},
+ {name:"Northern Ireland",capital:"Belfast",status:"SUSPENDED",lat:54.5973,lng:-5.9301,summary:"Operational record.",treaties:["Community Liaison Protocol"]},
  {name:"Ukraine",capital:"Kyiv",status:"LIMITED",lat:50.4501,lng:30.5234,summary:"Operational context record.",treaties:["Emergency Coordination Framework"]},
  {name:"United States",capital:"Washington, D.C.",status:"RECOGNISED",lat:38.9072,lng:-77.0369,summary:"Diplomatic relationship record.",treaties:["Bilateral Consultation Agreement"]}
 ];
-export const publications=[{department:"Ministry of Defence",date:"1 August 2026",title:"MOD Document 04",summary:"Ministry of Defence document.",href:"/publications#mod-document-04"},{department:"Global Affairs Canada",date:"28 July 2026",title:"Foreign Relations Brief 12",summary:"Public summary of diplomatic activity.",href:"/publications#foreign-relations-brief-12"},{department:"Emergency Centre",date:"25 July 2026",title:"Public Guidance Notice 08",summary:"Preparedness guidance.",href:"/publications#public-guidance-notice-08"}];
+export const publications=[{department:"Ministry of Defence",date:"1 August 2026",title:"MOD Document 04",summary:"Ministry of Defence document.",href:"/publications#mod-document-04"},{department:"Global Affairs Canada",date:"28 July 2026",title:"Foreign Relations Brief 12",summary:"Public summary of diplomatic activity.",href:"/publications#foreign-relations-brief-12"},{department:"Public Safety Office",date:"25 July 2026",title:"Public Guidance Notice 08",summary:"Preparedness guidance.",href:"/publications#public-guidance-notice-08"}];
