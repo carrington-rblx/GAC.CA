@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/client";
 type Section = "travel_notices" | "ministry_officials" | "publications";
 type Submission = { id: string; section: Section; action: "create" | "edit" | "delete"; target_id: string | null; proposed_data: Record<string, unknown>; status: "pending" | "approved" | "rejected"; submitted_at: string; review_note: string | null; submitted_by: string };
 type ContentRow = Record<string, unknown> & { id: string };
+type AuditEntry = { id: string; table_name: string; record_id: string | null; operation: string; changed_by: string | null; changed_at: string; old_data: Record<string, unknown> | null; new_data: Record<string, unknown> | null };
 const sectionLabels: Record<Section, string> = { travel_notices: "Travel notices", ministry_officials: "Ministry personnel", publications: "Publications" };
 const templates: Record<Section, Record<string, unknown>> = {
   travel_notices: { country: "Example country", level: "YELLOW", notice_text: "Fictional roleplay notice text.", published: false },
@@ -23,6 +24,7 @@ export default function AdminDashboard() {
   const [section, setSection] = useState<Section>("travel_notices");
   const [rows, setRows] = useState<ContentRow[]>([]);
   const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
   const [draft, setDraft] = useState(JSON.stringify(templates.travel_notices, null, 2));
   const [targetId, setTargetId] = useState("");
   const [action, setAction] = useState<"create" | "edit" | "delete">("create");
@@ -56,6 +58,10 @@ export default function AdminDashboard() {
     if (contentError) setMessage(contentError.message); else setRows((content || []) as ContentRow[]);
     const { data: proposals, error: proposalError } = await supabase.from("content_submissions").select("*").order("submitted_at", { ascending: false }).limit(100);
     if (proposalError) setMessage(proposalError.message); else setSubmissions((proposals || []) as Submission[]);
+    if (claimedRole === "admin") {
+      const { data: audit } = await supabase.from("admin_audit_log").select("id,table_name,record_id,operation,changed_by,changed_at,old_data,new_data").order("changed_at", { ascending: false }).limit(30);
+      setAuditLog((audit || []) as AuditEntry[]);
+    }
   }, [router, section, supabase]);
 
   useEffect(() => { load().catch(error => setMessage(error instanceof Error ? error.message : "Could not load dashboard.")); }, [load]);
@@ -198,6 +204,7 @@ export default function AdminDashboard() {
       <p className="mb-4 text-sm text-[#505A5F]">{role === "admin" ? "Review pending editor proposals. Approving applies the proposed change to the database." : "Track the status of proposals you have sent for review."}</p>
       {ownSubmissions.length === 0 ? <p>No submissions yet.</p> : <div className="space-y-4">{ownSubmissions.map(item=><article key={item.id} className="border border-[#B1B4B6] p-4"><div className="flex flex-wrap justify-between gap-2"><h3 className="font-bold">{sectionLabels[item.section]} · {item.action}</h3><span className="text-sm font-bold uppercase">{item.status}</span></div><p className="my-2 text-sm">Submitted {new Date(item.submitted_at).toLocaleString()} · {item.submitted_by}</p><pre className="max-h-48 overflow-auto whitespace-pre-wrap bg-[#F3F2F1] p-3 text-xs">{JSON.stringify(item.proposed_data, null, 2)}</pre>{role === "admin" && item.status === "pending" && <div className="mt-3 space-y-3"><label className="field-label" htmlFor={"note-"+item.id}>Review note (optional)</label><input id={"note-"+item.id} className="field" value={reviewNote[item.id] || ""} onChange={e=>setReviewNote(prev=>({...prev,[item.id]:e.target.value}))}/><div className="flex gap-3"><button disabled={busy} className="btn-primary" onClick={() => review(item,"approved")}>Approve</button><button disabled={busy} className="border border-[#961514] px-4 py-2 font-bold text-[#961514]" onClick={() => review(item,"rejected")}>Reject</button></div></div>}{item.review_note && <p className="mt-3 text-sm">Review note: {item.review_note}</p>}</article>)}</div>}
     </section>
+    {role === "admin" && <section className="mt-8 border border-[#B1B4B6] p-5"><h2 className="mb-2 text-xl font-bold">Audit trail</h2><p className="mb-4 text-sm text-[#505A5F]">Recent database inserts, edits, and deletions. Full before/after snapshots are retained in the database.</p>{auditLog.length === 0 ? <p>No content changes recorded yet.</p> : <div className="overflow-x-auto"><table className="w-full border-collapse text-left text-sm"><thead className="bg-[#F3F2F1]"><tr><th className="border-b p-3">Time</th><th className="border-b p-3">Table</th><th className="border-b p-3">Operation</th><th className="border-b p-3">Record</th><th className="border-b p-3">Actor UUID</th></tr></thead><tbody>{auditLog.map(entry=><tr key={entry.id} className="border-b"><td className="p-3">{new Date(entry.changed_at).toLocaleString()}</td><td className="p-3">{entry.table_name}</td><td className="p-3 font-bold">{entry.operation}</td><td className="p-3">{entry.record_id || "—"}</td><td className="p-3">{entry.changed_by || "system"}</td></tr>)}</tbody></table></div>}</section>}
     <p className="mt-6 text-sm"><Link href="/admin">Return to sign-in page</Link></p>
   </div>;
 }
