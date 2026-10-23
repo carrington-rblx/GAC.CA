@@ -31,9 +31,9 @@ export async function POST() {
   if (!profile?.active || profile.role !== "admin") return NextResponse.json({ error: "This account is not an active administrator." }, { status: 403 });
 
   const [notices, officials, publications] = await Promise.all([
-    db.from("travel_notices").select("*").eq("published", true).order("country"),
-    db.from("ministry_officials").select("*").eq("published", true).order("ministry"),
-    db.from("publications").select("*").eq("published", true).order("published_on", { ascending: false })
+    db.from("travel_notices").select("id,country,level,notice_text,published,updated_at").eq("published", true).order("country"),
+    db.from("ministry_officials").select("id,ministry,full_name,title,portfolio,published,updated_at").eq("published", true).order("ministry"),
+    db.from("publications").select("id,title,department,summary,document_url,published_on,published,updated_at").eq("published", true).order("published_on", { ascending: false })
   ]);
   const dbError = notices.error || officials.error || publications.error;
   if (dbError) return NextResponse.json({ error: "Could not read approved published content." }, { status: 500 });
