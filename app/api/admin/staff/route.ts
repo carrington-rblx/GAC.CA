@@ -12,9 +12,12 @@ export async function POST(request: Request) {
   const cookieStore = cookies();
   const sessionClient = createServerClient(url, publishableKey, {
     cookies: {
-      get(name) { return cookieStore.get(name)?.value; },
-      set(name, value, options) { cookieStore.set({ name, value, ...options }); },
-      remove(name, options) { cookieStore.set({ name, value: "", ...options }); }
+      getAll() { return cookieStore.getAll(); },
+      setAll(cookiesToSet) {
+        try {
+          cookiesToSet.forEach(({ name, value, options }) => cookieStore.set(name, value, options));
+        } catch {}
+      }
     }
   });
   const { data: auth } = await sessionClient.auth.getUser();
