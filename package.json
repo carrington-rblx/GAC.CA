@@ -2,12 +2,7 @@
   "name": "gac-ca-roleplay-portal",
   "version": "1.0.0",
   "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
-  },
+  "scripts": { "dev": "next dev", "build": "next build", "start": "next start", "lint": "next lint" },
   "dependencies": {
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.1",
@@ -22,10 +17,5 @@
     "react-dom": "^18.3.1",
     "react-leaflet": "^4.2.1"
   },
-  "devDependencies": {
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^3.4.17",
-    "typescript": "^5.7.3"
-  }
+  "devDependencies": { "autoprefixer": "^10.4.20", "postcss": "^8.5.3", "tailwindcss": "^3.4.17", "typescript": "^5.7.3" }
 }
