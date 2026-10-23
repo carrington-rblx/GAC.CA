@@ -29,6 +29,8 @@ export default function AdminDashboard() {
   const [reviewNote, setReviewNote] = useState<Record<string, string>>({});
   const [message, setMessage] = useState("");
   const [busy, setBusy] = useState(false);
+  const [editorEmail, setEditorEmail] = useState("");
+  const [editorName, setEditorName] = useState("");
   const supabase = useMemo(() => createClient(), []);
 
   const load = useCallback(async () => {
@@ -128,6 +130,28 @@ export default function AdminDashboard() {
     setDraft(JSON.stringify(editable, null, 2));
   }
 
+  async function inviteEditor(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault(); setBusy(true); setMessage("");
+    try {
+      const response = await fetch("/api/admin/staff", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email: editorEmail, display_name: editorName }) });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not invite editor.");
+      setMessage(result.message || "Editor invitation sent."); setEditorEmail(""); setEditorName("");
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Could not invite editor."); }
+    finally { setBusy(false); }
+  }
+
+  async function publishNow() {
+    setBusy(true); setMessage("");
+    try {
+      const response = await fetch("/api/admin/publish", { method: "POST" });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Publish failed.");
+      setMessage(result.commit_url ? "Published to GitHub: " + result.commit_url : result.message || "Published to GitHub.");
+    } catch (error) { setMessage(error instanceof Error ? error.message : "Publish failed."); }
+    finally { setBusy(false); }
+  }
+
   if (!user || !role) return <div className="shell py-12"><p role="status">{message || "Checking staff access…"}</p><p className="mt-4"><Link href="/admin">Return to sign in</Link></p></div>;
 
   const ownSubmissions = submissions.filter(item => role === "admin" || item.submitted_by === user.id);
@@ -139,6 +163,12 @@ export default function AdminDashboard() {
       <div><p className="mb-2 text-xs font-bold uppercase tracking-widest">Restricted staff workspace</p><h1 className="text-3xl font-bold sm:text-4xl">Content management</h1><p className="mt-3">{user.email} · {role === "admin" ? "Administrator" : "Editor"}</p></div>
       <button onClick={signOut} className="border border-white px-4 py-2 font-bold hover:bg-white hover:text-[#961514]">Sign out</button>
     </section>
+    {role === "admin" && <section className="mb-8 grid gap-6 border border-[#B1B4B6] p-5 md:grid-cols-2">
+      <div><h2 className="mb-2 text-xl font-bold">Invite an editor</h2><p className="mb-4 text-sm">Send an email invitation. New accounts receive the editor role and can propose changes only.</p>
+        <form onSubmit={inviteEditor} className="space-y-3"><div><label className="field-label" htmlFor="editor-name">Display name</label><input id="editor-name" className="field" value={editorName} onChange={e=>setEditorName(e.target.value)} required /></div><div><label className="field-label" htmlFor="editor-email">Editor email</label><input id="editor-email" type="email" className="field" value={editorEmail} onChange={e=>setEditorEmail(e.target.value)} required /></div><button className="btn-primary" disabled={busy}>{busy ? "Working…" : "Invite editor"}</button></form>
+      </div>
+      <div><h2 className="mb-2 text-xl font-bold">Publish approved content</h2><p className="mb-4 text-sm">Commit a snapshot of all currently published notices, ministry personnel, and publications to the main GitHub branch. This triggers the normal site deployment workflow.</p><button className="btn-primary" disabled={busy} onClick={publishNow}>{busy ? "Working…" : "Publish snapshot to GitHub"}</button><p className="mt-3 text-xs text-[#505A5F]">Requires the server-only Supabase service key and a GitHub token with Contents read/write access.</p></div>
+    </section>}
     {message && <p role="status" className="mb-6 border-l-4 border-[#F47738] bg-[#F3F2F1] p-4">{message}</p>}
     <section className="mb-8 border border-[#B1B4B6] p-5">
       <h2 className="mb-4 text-xl font-bold">Manage content</h2>
